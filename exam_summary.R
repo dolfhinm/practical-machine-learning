@@ -47,23 +47,21 @@ plot(data_train_training$classe)
 gc()
 
 #create model
-#All models, besides Decision Tree, have had error with memory, so work have run with only one method
+#All models, besides Random Forest, have had error with memory or have very more time, so work have run with only one method
 #tc <- trainControl(method = "cv", number = 1, verboseIter = FALSE)
-#mod_rf <- train(classe~., data = data_train_training, method = "rf", trControl = tc)
 #mod_gbm <- train(classe ~., data = data_train_training, method = "gbm", trControl = tc)
 #mod_lda <- train(classe~., data = data_train_training, method = "lda", trControl = tc)
 #mod_nn <- train(classe~., data = data_train_training, method = "nnet", trControl = tc)
 #mod_las <- train(classe~., data = data_train_training, method = "lasso", trControl = tc)
 
-mod_part <- rpart(classe ~ ., data=data_train_training, method="class")
+# model Decision Tree
+mod_rf2 <- randomForest(data_train_training$classe ~ ., data=data_train_training) 
 
-#measure the accuracy
-
-predTrain <- predict(mod_part, data_train_training)
+predTrain <- predict(mod_rf2, data_train_training)
 confusionMatrix(predTrain, data_train_training$classe)
 
-predTrainTest <- predict(mod_part, data_train_testing)
+predTrainTest <- predict(mod_rf2, data_train_testing)
 confusionMatrix(predTrainTest, data_train_testing$classe)
 
-predTest <- predict(mod_part, data_test)
+predTest <- predict(mod_rf2, data_test)
 predTest

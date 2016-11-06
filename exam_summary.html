@@ -136,9 +136,35 @@ if (length(setdiff(packages, rownames(installed.packages()))) &gt; 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
 
-library(caret); library(rpart); library(ggplot2)
-library(gbm); library(lubridate); library(randomForest)
-library(lda); library(nnet)</code></pre>
+library(caret); library(rpart); library(ggplot2)</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre class="r"><code>library(gbm); library(lubridate); library(randomForest)</code></pre>
+<pre><code>## Warning: package 'gbm' was built under R version 3.3.2</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: 'survival'</code></pre>
+<pre><code>## The following object is masked from 'package:caret':
+## 
+##     cluster</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loaded gbm 2.1.1</code></pre>
+<pre><code>## Warning: package 'lubridate' was built under R version 3.3.2</code></pre>
+<pre><code>## 
+## Attaching package: 'lubridate'</code></pre>
+<pre><code>## The following object is masked from 'package:base':
+## 
+##     date</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
+<pre class="r"><code>library(lda); library(nnet)</code></pre>
+<pre><code>## Warning: package 'lda' was built under R version 3.3.2</code></pre>
 <p>Download files of training and testing.</p>
 <pre class="r"><code>set.seed(1234)
 
@@ -146,10 +172,9 @@ url_train&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-trai
 url_test&lt;-&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
 
 download.file(url_train,&quot;pml-training.csv&quot;)
-download.file(url_test,&quot;pml-testing.csv&quot;)
-
-data_train&lt;-read.csv2(&quot;pml-training.csv&quot;, sep = &quot;,&quot;, na.strings = c(&quot;NA&quot;, &quot;#DIV/0!&quot;, &quot;&quot;))
-data_test&lt;-read.csv2(&quot;pml-testing.csv&quot;, sep = &quot;,&quot;, na.strings = c(&quot;NA&quot;, &quot;#DIV/0!&quot;, &quot;&quot;))</code></pre>
+download.file(url_test,&quot;pml-testing.csv&quot;)</code></pre>
+<pre class="r"><code>data_train&lt;-read.csv2(&quot;pml-training.csv&quot;, sep = &quot;,&quot;, na.strings = c(&quot;NA&quot;, &quot;#DIV/0!&quot;, &quot;&quot;), stringsAsFactors = FALSE)
+data_test&lt;-read.csv2(&quot;pml-testing.csv&quot;, sep = &quot;,&quot;, na.strings = c(&quot;NA&quot;, &quot;#DIV/0!&quot;, &quot;&quot;), stringsAsFactors = FALSE)</code></pre>
 </div>
 <div id="clean-data" class="section level2">
 <h2>Clean data</h2>
@@ -169,20 +194,85 @@ data_train_testing$classe = as.factor(data_train_testing$classe)</code></pre>
 </div>
 <div id="create-the-prediction-model" class="section level2">
 <h2>Create the prediction model</h2>
-<p>For this analysis have tried to use different models. But, unfortunately, more from them i have had error with memory - cannot allocate vector of size 2.0 Gb. In summary stayed on model “Decision Tree”, with function - rpart().</p>
-<pre class="r"><code>mod_part &lt;- rpart(classe ~ ., data=data_train_training, method=&quot;class&quot;)</code></pre>
+<p>For this analysis have tried to use different models. But, unfortunately, more from them i have had error with memory - cannot allocate vector of size 2.0 Gb. In summary stayed on model “Random Forest”, with function - rpart().</p>
+<pre class="r"><code>mod_rf2 &lt;- randomForest(data_train_training$classe ~ ., data=data_train_training) </code></pre>
 </div>
 <div id="measure-the-accuracy" class="section level2">
 <h2>Measure the accuracy</h2>
-<pre class="r"><code>predTrain &lt;- predict(mod_part, data_train_training)
-confusionMatrix(predTrain, data_train_training$classe)
-
-predTrainTest &lt;- predict(mod_part, data_train_testing)
+<pre class="r"><code>predTrain &lt;- predict(mod_rf2, data_train_training)
+confusionMatrix(predTrain, data_train_training$classe)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 3348    0    0    0    0
+##          B    0 2279    0    0    0
+##          C    0    0 2054    0    0
+##          D    0    0    0 1930    0
+##          E    0    0    0    0 2165
+## 
+## Overall Statistics
+##                                      
+##                Accuracy : 1          
+##                  95% CI : (0.9997, 1)
+##     No Information Rate : 0.2843     
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
+##                                      
+##                   Kappa : 1          
+##  Mcnemar's Test P-Value : NA         
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Prevalence             0.2843   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
+## Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+## Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000</code></pre>
+<pre class="r"><code>predTrainTest &lt;- predict(mod_rf2, data_train_testing)
 confusionMatrix(predTrainTest, data_train_testing$classe)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 2231    6    0    0    0
+##          B    1 1510   12    0    0
+##          C    0    2 1355   13    1
+##          D    0    0    1 1272    1
+##          E    0    0    0    1 1440
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.9952          
+##                  95% CI : (0.9934, 0.9966)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9939          
+##  Mcnemar's Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9996   0.9947   0.9905   0.9891   0.9986
+## Specificity            0.9989   0.9979   0.9975   0.9997   0.9998
+## Pos Pred Value         0.9973   0.9915   0.9883   0.9984   0.9993
+## Neg Pred Value         0.9998   0.9987   0.9980   0.9979   0.9997
+## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2843   0.1925   0.1727   0.1621   0.1835
+## Detection Prevalence   0.2851   0.1941   0.1747   0.1624   0.1837
+## Balanced Accuracy      0.9992   0.9963   0.9940   0.9944   0.9992</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<pre class="r"><code>predTest &lt;- predict(mod_part, data_test)</code></pre>
+<pre class="r"><code>predTest &lt;- predict(mod_rf2, data_test)
+predTest</code></pre>
+<pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E</code></pre>
 </div>
 
 
